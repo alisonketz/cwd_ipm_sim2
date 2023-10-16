@@ -6,18 +6,32 @@
 ###
 #######################################################################
 
-load("datafiles/fit_sum_N.Rdata")
+load("datafiles/fit_sum_finaldat.Rdata")
+
+n_year  <- 5
 
 n_ageclassm <- 6
 n_ageclassf <- 7
 n_ageclass <- n_ageclassm
+
+n_agef <- 10
+n_agem <- 7
+n_age <- n_agem
+
+nT_age_short_f <- 52 * (n_agef - 1) + 2
+nT_age_surv_aah_f <- 52 * n_agef + 2
+nT_age_short_m <- 52 * (n_agem - 1) + 1
+nT_age_surv_aah_m <- 52 * n_agem + 1 
+
+nT_age_short <- nT_age_short_m
+nT_age_surv_aah <- nT_age_surv_aah_m
 
 period_effect_true <- fit_sum[grep("period_effect_surv", rownames(fit_sum)), 1]
 nT_period <- length(period_effect_true)
 age_effect_true <- fit_sum[ grep("age_effect", rownames(fit_sum)), 1]
 nT_age <- length(age_effect_true)
 beta0_survival_sus_true <- fit_sum[grep("beta0_survival_sus",
-                                   rownames(fit_sum)), 1]
+                                   rownames(fit_sum)), 1] 
 
 beta0_survival_inf_true <- fit_sum[grep("beta0_survival_inf",
                                    rownames(fit_sum)), 1]
@@ -47,6 +61,27 @@ m_age_foi_true <- c(m_age_foi_true,rep(m_age_foi[6],
 
 age_foi <- m_age_foi
 
+#scale these for the males, since using male foi
+beta0_survival_sus_true <- beta0_survival_sus_true + beta_male_true
+beta0_survival_inf_true <- beta0_survival_inf_true + beta_male_true
+
+
+age_foi_true_df <- data.frame(age_foi_true = m_age_foi_true, age = 1:nT_age)
+age_foi_true_plot <- ggplot(age_foi_true_df, aes(x = age,y = age_foi_true))+geom_point()+
+                theme_bw()+
+                ggtitle("True Age Effect")+
+                xlab("Age")+
+                ylab("FOI")+
+                theme(axis.text = element_text(size = 12),
+                      axis.title = element_text(size = 16),
+                      strip.text = element_text(size = 16),
+                      legend.title = element_text(size = 16),
+                      legend.text = element_text(size = 14),
+                      axis.text.x = element_text(angle = 45,hjust = 1))
+age_foi_true_plot
+
+ggsave(paste0("figures/age_foi_true_plot.png"),
+              age_foi_true_plot,height = 6, width = 10.5)
 
 ##################################################################
 ###

@@ -13,22 +13,67 @@ dat <- ageperiod_surv_foi_sim_data(
             age_effect = age_effect_true,
             period_effect = period_effect_true,
             nT_age = nT_age,
-            nT_period = nT_period
+            nT_period = nT_period,
+            processnum = processnum
             )
 
-# table(dat$pos1)
-# table(dat$pos2)
-# hist(dat$right_age,breaks = 100)
-# hist(dat$right_age)
-# sum(dat$rt_censor)
-# n_ind
+n_fit <- nrow(dat$df_fit)
+n_fit_sus_cens_posttest <- nrow(dat$d_fit_sus_cens_posttest)
+n_fit_sus_cens_postno <- nrow(dat$d_fit_sus_cens_postno)
+n_fit_sus_mort_posttest <- nrow(dat$d_fit_sus_mort_posttest)
+n_fit_sus_mort_postno <- nrow(dat$d_fit_sus_mort_postno)
+n_fit_icap_cens <- nrow(dat$d_fit_icap_cens)
+n_fit_icap_mort <- nrow(dat$d_fit_icap_mort)
+n_fit_rec_neg_cens_posttest <- nrow(dat$d_fit_rec_neg_cens_posttest)
+n_fit_rec_neg_cens_postno <- nrow(dat$d_fit_rec_neg_cens_postno)
+n_fit_rec_neg_mort <- nrow(dat$d_fit_rec_neg_mort)
+n_fit_rec_pos_cens <- nrow(dat$d_fit_rec_pos_cens)
+n_fit_rec_pos_mort <- nrow(dat$d_fit_rec_pos_mort)
+n_fit_idead <- nrow(dat$d_fit_idead)
 
-# hist(dat$right_period,breaks = 100)
-# dat$right_age
-# # prevalence
-# sum(!is.na(dat$inf_age))/n_ind
-# dat$inf_status[1,]
-# which(dat$inf_age[!is.na(inf_age)] < dat$left_age[!is.na(inf_age)])
+### test that these data combined are the same
+### dimension as the overall generated data
+# n_fit_sus_cens_posttest+
+# n_fit_sus_cens_postno+
+# n_fit_sus_mort_posttest+
+# n_fit_sus_mort_postno+
+# n_fit_icap_cens+
+# n_fit_icap_mort+
+# n_fit_rec_neg_cens_posttest+
+# n_fit_rec_neg_cens_postno+
+# n_fit_rec_neg_mort+
+# n_fit_rec_pos_cens+
+# n_fit_rec_pos_mort+
+# n_fit_idead
+
+datatypes_out <- data.frame(datatype = c("overall","sus_cens_posttest",
+"sus_cens_postno",
+"sus_mort_posttest",
+"sus_mort_postno",
+"icap_cens",
+"icap_mort",
+"rec_neg_cens_posttest",
+"rec_neg_cens_postno",
+"rec_neg_mort",
+"rec_pos_cens",
+"rec_pos_mort",
+"idead"),
+number_samples = c(n_fit,
+n_fit_sus_cens_posttest,
+n_fit_sus_cens_postno,
+n_fit_sus_mort_posttest,
+n_fit_sus_mort_postno,
+n_fit_icap_cens,
+n_fit_icap_mort,
+n_fit_rec_neg_cens_posttest,
+n_fit_rec_neg_cens_postno,
+n_fit_rec_neg_mort,
+n_fit_rec_pos_cens,
+n_fit_rec_pos_mort,
+n_fit_idead))
+
+datatypes_out
+write.csv(datatypes_out, file = paste0("datatypes_out_",processnum,".csv"))
 
 
 ##############################################################
@@ -36,7 +81,7 @@ dat <- ageperiod_surv_foi_sim_data(
 ### because we aren't accounting for 
 ### disease-associated mortality in the generating function
 ##############################################################
-icap_eval_df <- data.frame(left_age = dat$left_age[dat$pos1==TRUE])
+# icap_eval_df <- data.frame(left_age = dat$left_age[dat$pos1==TRUE])
 # icap_eval_plot <- ggplot(data = icap_eval_df) +
 #       geom_histogram(aes(x = left_age),bins = 50) +
 #       theme_bw() +
@@ -97,54 +142,6 @@ icap_eval_df <- data.frame(left_age = dat$left_age[dat$pos1==TRUE])
 # n_remove <- sum(dat$pos1) - round(sum(dat$pos1)/5)
 # indx_remove <- sample(which(dat$pos1==TRUE),n_remove,replace=FALSE) 
 # n_ind <- dat$n_ind - n_remove
-n_ind <- dat$n_ind
+# n_ind <- dat$n_ind
 
 
-##############################################################
-###
-### setup overall data frame
-###
-##############################################################
-
-df_fit <- data.frame(id = 1:n_ind,
-                     left_age = dat$left_age,
-                     right_age = dat$right_age,
-                     left_period = dat$left_period,
-                     right_period = dat$right_period,
-                     rt_censor = dat$rt_censor,
-                     cwd_cap = dat$pos1,
-                     cwd_mort = dat$pos2,
-                     inf_age = dat$inf_age
-                     )
-
-df_fit$inf_period = df_fit$right_age - df_fit$inf_age + df_fit$left_period
-n_fit <- nrow(df_fit)
-# hist(df_fit$left_period, breaks = 100)
-# hist(df_fit$inf_period[df_fit$inf_period>0],breaks = 100)
-# sum(df_fitinf_cap)
-# sum(1-df_fit$rt_censor)
-# sum(df_fit$rt_censor)
-
-
-### setting up in terms of e/r/s
-df_fit$e_age <- df_fit$left_age
-df_fit$r_age <- df_fit$right_age
-df_fit$s_age <- df_fit$right_age
-df_fit$r_age[df_fit$rt_censor == 0] <- df_fit$r_age[df_fit$rt_censor == 0] - 1
-df_fit$s_age[df_fit$rt_censor == 1] <- NA
-
-
-df_fit$e_period <- df_fit$left_period
-df_fit$r_period <- df_fit$right_period
-df_fit$s_period <- df_fit$right_period
-df_fit$r_period[df_fit$rt_censor == 0] <- df_fit$r_period[df_fit$rt_censor == 0] - 1
-df_fit$s_period[df_fit$rt_censor == 1] <- NA
-
-
-########################################################################
-### calibrating age of deer with the study time 
-### for indexing in the likelihood for loops
-### age2date = left_period - left_age
-########################################################################
-
-df_fit$age2date <- df_fit$e_period - df_fit$e_age

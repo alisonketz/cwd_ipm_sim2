@@ -9,7 +9,7 @@
 
 rm(list = ls())
 
-setwd("~/Documents/ipm/cwd_ipm_sim1")
+setwd("~/Documents/ipm/cwd_ipm_sim2")
 
 library(viridis)
 library(RColorBrewer)
@@ -22,25 +22,32 @@ library(gridExtra)
 library(xtable)
 library(nimble)
 library(tidyverse)
-library(dplyr)
+# library(dplyr)
 library(lattice)
 library(foreign)
-library(rgdal)
-library(rgeos)
-library(zoo)
-library(spdep)
+# library(rgdal)
+# library(rgeos)
+# library(zoo)
+# library(spdep)
 library(parallel)
 library(doParallel)
 library(coda)
-library(INLA)
-library(sf)
-library(terra)
-library(splines)
+# library(INLA)
+# library(sf)
+# library(terra)
+# library(splines)
 library(MetBrewer)
 library(ggforce)
 library(tidyr)
 library(ggridges)
 library(ggh4x)
+
+###########################################################
+### Process number and setting seed
+###########################################################
+
+processnum <- 100
+set.seed(processnum + 1000)
 
 ###########################################################
 ### Source summary function for posteriors
@@ -58,51 +65,45 @@ source("02_load_all_data_to_run.R")
 # Generate simulated data
 ###############################################################
 
-# source("04_generate_data.R")
-# source("04_generate_data_weighted_icap.R")
 source("04_generate_data_noremove_icap.R")
-
-###############################################################
-# Partition simulated data into cases
-###############################################################
-
-source("05_data_cases.R")
+# source("04_generate_data_equal_weight_rm.R")
+# source("04_generate_data_weighted_icap.R")
 
 ###########################################################
 ### Setup consts etc for running the model
 ###########################################################
 
-source("06_prelim_survival.R")
+source("05_prelim_survival.R")
 
-source("07_prelim_foi.R")
+source("06_prelim_foi.R")
 
 ###########################################################
 ### Likelihoods
 ###########################################################
 
-source("08_distributions.R")
+source("07_distributions.R")
 
-###########################################################
-### Functions for Efficient Calculations
-###########################################################
+# ###########################################################
+# ### Functions for Efficient Calculations
+# ###########################################################
 
-# source("09_calculations.R")
-
-###########################################################
-### Run model
-###########################################################
-
-source("10_modelcode.R")
+source("08_calculations.R")
 
 ###########################################################
 ### Run model
 ###########################################################
 
-source("11_run_model.R")
-# source("11_run_model_par.R")
+source("09_modelcode.R")
+
+###########################################################
+### Run model
+###########################################################
+
+source("10_run_model.R")
+# source("10_run_model_par.R")
 
 ###########################################################
 ### Post processing
 ###########################################################
 
-source("12_post_process.R")
+source("11_post_process.R")
